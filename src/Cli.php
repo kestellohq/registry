@@ -6,6 +6,7 @@ namespace Kestello\Registry;
 
 use Kestello\Cms\Package\PackageSignature;
 use Kestello\Cms\Package\Registry\Envelope;
+use Kestello\Framework\Http\Client\HttpClient;
 use Kestello\Framework\Testing\TestRunner;
 use RuntimeException;
 use Throwable;
@@ -27,6 +28,7 @@ final class Cli
             return match ($command) {
                 'check' => self::check($root, $options),
                 'build' => self::build($root, $options),
+                'accept' => self::accept($root, $options),
                 'test' => (new TestRunner())->run($root . '/tests', $options['filter'] ?? null) ? 0 : 1,
                 default => self::help(),
             };
@@ -91,6 +93,39 @@ final class Cli
     }
 
     /**
+     * Look for new versions and accept or refuse them. Prints a summary, and writes the full report
+     * as JSON with --report for the workflow that opens the pull request.
+     *
+     * @param array<string, string> $options
+     */
+    private static function accept(string $root, array $options): int
+    {
+        $dl = $options['dl'] ?? throw new RuntimeException('Usage: accept --dl=<directory for accepted zips> [--package=<name>] [--report=<file>]');
+        $rules = Rules::load($root);
+        $in = Inputs::load($root, $rules);
+        $token = getenv('GITHUB_TOKEN');
+        $intake = new Intake($root, $in, $rules, new HttpClient(), $dl, self::now($options), is_string($token) ? $token : null);
+        $report = $intake->run($options['package'] ?? null);
+        foreach ($report['accepted'] as $a) {
+            echo "Accepted {$a['slug']} {$a['version']}" . ($a['review'] === [] ? '' : ' (needs a person: ' . implode(' ', $a['review']) . ')') . "\n";
+        }
+        foreach ($report['refused'] as $r) {
+            echo "Refused {$r['slug']} {$r['version']}: {$r['reason']}\n";
+        }
+        foreach ($report['changed'] as $c) {
+            echo "Changed {$c['slug']} {$c['version']}: {$c['reason']}\n";
+        }
+        foreach ($report['errors'] as $e) {
+            fwrite(STDERR, "Error: {$e}\n");
+        }
+        if (isset($options['report'])) {
+            file_put_contents($options['report'], Json::encode($report) . "\n");
+        }
+
+        return $report['errors'] === [] ? 0 : 1;
+    }
+
+    /**
      * A key list signed by a throwaway root, naming a throwaway index key: for checking a build
      * with no secrets.
      *
@@ -127,7 +162,7 @@ final class Cli
 
     private static function help(): int
     {
-        echo "Usage: php bin/registry check | build --out=<directory> [--now=<time>] | test [--filter=<name>]\n";
+        echo "Usage: php bin/registry check | accept --dl=<directory> [--package=<name>] [--report=<file>] | build --out=<directory> [--now=<time>] | test [--filter=<name>]\n";
 
         return 2;
     }
