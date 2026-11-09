@@ -1,0 +1,8 @@
+{
+  "type": "plugin",
+  "organisation": "kestellohq",
+  "source": { "github": "kestellohq/plugins" },
+  "categories": ["integrations"],
+  "homepage": "https://github.com/kestellohq/plugins/tree/main/meilisearch",
+  "support": "https://github.com/kestellohq/plugins/issues"
+}
