@@ -53,7 +53,7 @@ php bin/registry build --out=build/v1   # the publishing job only: needs KESTELL
 
 ## How a version gets in
 
-A package names its GitHub repository. A release tagged `v<version>` that carries `<name>-<version>.zip` and `<name>-<version>.zip.sha256` is a new version, as for Kestello's own GitHub updates. `accept` checks it with Kestello's code:
+A package names its GitHub repository. A release tagged `v<version>`, or `<name>-v<version>` in a repository holding several packages (`meilisearch-v1.0.0` in `kestellohq/plugins`), that carries `<name>-<version>.zip` and `<name>-<version>.zip.sha256` is a new version, as for Kestello's own GitHub updates. `accept` checks it with Kestello's code:
 
 1. The zip matches its `.sha256`.
 2. It is signed by a key the root certified for the package's organisation on the release date, and not revoked.
