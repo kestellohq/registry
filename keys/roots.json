@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Kestello root A",
+        "id": "f8a1ed747b283d96",
+        "public_key": "RhbiRnOJyiLygoUVTVz8otZAoHlnJqquLelOxCIaVIw="
+    },
+    {
+        "name": "Kestello root B (spare, kept offline)",
+        "id": "699f19b70e49354a",
+        "public_key": "6xpEAcQD3oZcPy4UwR0Sbpt7PowlnQNurBL3uXwZH/Q="
+    }
+]

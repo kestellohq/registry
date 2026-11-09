@@ -1,0 +1,70 @@
+name: Publish
+
+# Builds the registry, reads it back with Kestello's own reader, and uploads it to R2
+# (registry-format.md §9.3): hash-named files first, then keys.json, then index.json, so a site
+# always sees a complete set. A new index is signed every day even when nothing changed, because
+# an index expires after 14 days.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  R2_ENDPOINT: https://a0355fdc409ba11269265f348b834e00.r2.cloudflarestorage.com
+  R2_BUCKET: kestello-registry
+  AWS_DEFAULT_REGION: auto
+  AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
+  AWS_RESPONSE_CHECKSUM_VALIDATION: WHEN_REQUIRED
+
+jobs:
+  publish:
+    name: Build and upload
+    runs-on: ubuntu-latest
+    environment: publish
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Kestello at the commit in cms.lock
+        id: cms
+        run: echo "commit=$(jq -r .commit cms.lock)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+        with:
+          repository: kestellohq/cms
+          ref: ${{ steps.cms.outputs.commit }}
+          path: cms
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: sodium, mbstring, json
+          coverage: none
+
+      - name: Build and read back
+        env:
+          KESTELLO_REGISTRY_INDEX_KEY: ${{ secrets.KESTELLO_REGISTRY_INDEX_KEY }}
+        run: php bin/registry build --out=build/v1
+
+      - name: Upload
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          s3() { aws s3 "$@" --endpoint-url "$R2_ENDPOINT" --only-show-errors; }
+          # named by their hash, so a file of the same name and size is the same file
+          s3 sync build/v1 "s3://$R2_BUCKET/v1" --size-only --exclude index.json --exclude keys.json \
+            --content-type application/json --cache-control 'public, max-age=31536000, immutable'
+          s3 cp build/v1/keys.json "s3://$R2_BUCKET/v1/keys.json" --content-type application/json --cache-control 'public, max-age=300'
+          s3 cp build/v1/index.json "s3://$R2_BUCKET/v1/index.json" --content-type application/json --cache-control 'public, max-age=300'
+          echo "Published serial $(jq -r .payload build/v1/index.json | base64 -d | jq .serial)."

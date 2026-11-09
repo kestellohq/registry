@@ -1,0 +1,103 @@
+name: Intake
+
+# Looks for new versions every hour (php bin/registry accept). Accepted zips are uploaded to R2
+# first, then the ledger change goes up as a pull request: merged by a person, who reviews
+# flagged versions (an organisation's first, new permissions) before merging.
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: intake
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+env:
+  R2_ENDPOINT: https://a0355fdc409ba11269265f348b834e00.r2.cloudflarestorage.com
+  R2_BUCKET: kestello-registry
+  AWS_DEFAULT_REGION: auto
+  AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
+  AWS_RESPONSE_CHECKSUM_VALIDATION: WHEN_REQUIRED
+
+jobs:
+  intake:
+    name: Accept new versions
+    runs-on: ubuntu-latest
+    environment: publish
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Wait for an open intake pull request first
+        id: open
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          n=$(gh pr list --state open --json headRefName -q '[.[] | select(.headRefName | startswith("intake/"))] | length')
+          echo "count=$n" >> "$GITHUB_OUTPUT"
+          [ "$n" = 0 ] || echo "An intake pull request is still open; this run waits for it to be merged or closed."
+
+      - name: Kestello at the commit in cms.lock
+        if: steps.open.outputs.count == '0'
+        id: cms
+        run: echo "commit=$(jq -r .commit cms.lock)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+        if: steps.open.outputs.count == '0'
+        with:
+          repository: kestellohq/cms
+          ref: ${{ steps.cms.outputs.commit }}
+          path: cms
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@v2
+        if: steps.open.outputs.count == '0'
+        with:
+          php-version: '8.4'
+          extensions: sodium, mbstring, json, curl
+          coverage: none
+
+      - name: Accept
+        if: steps.open.outputs.count == '0'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: php bin/registry accept --dl=build/v1/dl --report=build/report.json
+
+      - name: Upload accepted zips
+        if: steps.open.outputs.count == '0' && hashFiles('build/v1/dl/**') != ''
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          aws s3 sync build/v1/dl "s3://$R2_BUCKET/v1/dl" --size-only --endpoint-url "$R2_ENDPOINT" --only-show-errors \
+            --content-type application/zip --cache-control 'public, max-age=31536000, immutable'
+
+      - name: Open a pull request with the ledger
+        if: steps.open.outputs.count == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- ledger; then echo "Nothing new."; exit 0; fi
+          branch="intake/$(date -u +%Y%m%d-%H%M)"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898828+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$branch"
+          git add ledger
+          git commit -q -m "chore(ledger): new versions $(date -u +%Y-%m-%d)"
+          git push -q origin "$branch"
+          {
+            echo '## Accepted'
+            jq -r '.accepted[] | "- **\(.slug) \(.version)**" + (if (.review | length) > 0 then "\n  - Needs a person: " + (.review | join(" ")) else "" end)' build/report.json
+            echo; echo '## Refused'
+            jq -r '.refused[] | "- **\(.slug) \(.version)**: \(.reason)"' build/report.json
+            echo; echo '## Changed after acceptance'
+            jq -r '.changed[] | "- **\(.slug) \(.version)**: \(.reason)"' build/report.json
+          } > build/body.md
+          gh pr create --base main --head "$branch" --title "chore(ledger): new versions $(date -u +%Y-%m-%d)" --body-file build/body.md
+          # pull requests opened with the workflow's own token don't start other workflows; this one may
+          gh workflow run check.yml --ref "$branch"
