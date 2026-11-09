@@ -1,0 +1,42 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Inputs and builder
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Kestello at the commit in cms.lock
+        id: cms
+        run: echo "commit=$(jq -r .commit cms.lock)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+        with:
+          repository: kestellohq/cms
+          ref: ${{ steps.cms.outputs.commit }}
+          path: cms
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: sodium, mbstring, json
+          coverage: none
+
+      - name: Syntax
+        run: find bin src tests -name '*.php' -o -name registry -type f | xargs -n1 php -l > /dev/null
+
+      - name: Tests
+        run: php bin/registry test
+
+      - name: Inputs
+        run: php bin/registry check

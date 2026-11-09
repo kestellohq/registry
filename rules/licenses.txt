@@ -1,0 +1,21 @@
+# SPDX ids of the licenses a package may use (registry-format.md §1.5): the GPL or a license
+# compatible with it. A license is added when the Free Software Foundation lists it as compatible.
+
+GPL-2.0-only
+GPL-2.0-or-later
+GPL-3.0-only
+GPL-3.0-or-later
+LGPL-2.1-or-later
+LGPL-3.0-or-later
+MIT
+MIT-0
+BSD-2-Clause
+BSD-3-Clause
+0BSD
+ISC
+Apache-2.0
+MPL-2.0
+Zlib
+Unlicense
+CC0-1.0
+WTFPL

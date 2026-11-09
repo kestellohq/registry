@@ -1,0 +1,44 @@
+# Names only the project (organisation "kestellohq") may use, for packages and organisations.
+# One per line; a trailing * reserves every name starting with what comes before it.
+# registry-format.md §1.2. A core feature added later goes here before its release.
+
+kestello
+kestello-*
+core
+admin
+api
+system
+site
+www
+test
+example
+pages
+posts
+media
+forms
+menus
+redirects
+people
+users
+roles
+themes
+plugins
+settings
+updates
+backups
+import
+export
+search
+sitemap
+seo
+cache
+health
+jobs
+webhooks
+fleet
+blocks
+editor
+security
+audit
+email
+i18n
