@@ -1,0 +1,11 @@
+{
+    "format": 1,
+    "payload": "eyJraW5kIjoia2V5cyIsImZvcm1hdCI6MSwic2VyaWFsIjoxLCJpc3N1ZWRfYXQiOiIyMDI2LTExLTA5VDIxOjM0OjI1WiIsImV4cGlyZXNfYXQiOiIyMDI3LTEyLTA5VDIxOjM0OjI1WiIsImluZGV4X2tleXMiOlt7ImtleSI6ImQ4MTk5ZTVlYTYyNWM3MTMiLCJwdWJsaWNfa2V5IjoiU3Z3RzY3cGFhL0RjNm54R0I1K01kbGVaTFRUVjNJdVBhdE5PVHB4Wml4Yz0iLCJ2YWxpZF9mcm9tIjoiMjAyNi0xMS0wOVQyMTozNDoyNVoiLCJ2YWxpZF91bnRpbCI6IjIwMjctMTItMDlUMjE6MzQ6MjVaIn1dLCJyZXZva2VkIjpbXX0=",
+    "signatures": [
+        {
+            "alg": "ed25519",
+            "key": "f8a1ed747b283d96",
+            "sig": "SYdA7fnfYg/gJReixlPSgz+HayanVjuoD6YSO/Nm8e6V2qEaKNy39ViW6TL7U7pyyiH8ZOh9uUa4vD5G7XzNCA=="
+        }
+    ]
+}

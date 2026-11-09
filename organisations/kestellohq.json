@@ -1,0 +1,21 @@
+{
+    "name": "Kestello",
+    "homepage": "https://kestello.com",
+    "verified": {
+        "domain": "kestello.com",
+        "at": "2026-11-09T00:00:00Z"
+    },
+    "keys": [
+        {
+            "format": 1,
+            "payload": "eyJraW5kIjoib3JnYW5pc2F0aW9uIiwib3JnYW5pc2F0aW9uIjoia2VzdGVsbG9ocSIsImtleSI6IjRiMDM4ODdiMTc3MTFkZDYiLCJwdWJsaWNfa2V5IjoiUldWYTZxYnp2R01HNlMrbElOZWtBTXVUV2NwTjBSUGx0T2hXN2NjR3d3ST0iLCJ2YWxpZF9mcm9tIjoiMjAyNi0xMS0wOVQyMTozNDoyNVoiLCJ2YWxpZF91bnRpbCI6IjIwMjktMTEtMDhUMjE6MzQ6MjVaIn0=",
+            "signatures": [
+                {
+                    "alg": "ed25519",
+                    "key": "f8a1ed747b283d96",
+                    "sig": "+78MtqTCB7ADfaLfYLxXsQ13jkXZ7dqJcW1AvYKUlC+ZQ3jZmwIIbubXJZn/5JbddjgWUfr2du/SwCNetX+fAQ=="
+                }
+            ]
+        }
+    ]
+}

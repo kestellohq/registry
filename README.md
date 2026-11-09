@@ -8,6 +8,8 @@ The formats and rules are specified in the Kestello planning spec, `registry-for
 
 Not open for submissions yet.
 
+Published at `https://registry.kestello.com/v1/` by the **Publish** workflow (every merge and every day), from the R2 bucket `kestello-registry`. The **Intake** workflow looks for new versions every hour and opens a pull request with them.
+
 ## What is here
 
 | Path | Edited by | Holds |
@@ -20,6 +22,18 @@ Not open for submissions yet.
 | `advisories/<id>.json` | People | A security advisory |
 | `moves/<name>.json` | The root key | A package moving to another organisation |
 | `ledger/<name>.json` | The builder only | Every accepted version and what was checked. Never edited, never deleted |
+
+## Keys
+
+`keys/roots.json` holds the two root public keys Kestello ships: A signs, B is the spare. The secret halves never come near this repository or CI. `keys/keys.json` names the index key, which CI uses through the `publish` environment (secret `KESTELLO_REGISTRY_INDEX_KEY`, `main` only), and every revoked key.
+
+On the machine that holds root A:
+
+```sh
+php bin/registry keygen --out=<file>                                            # a new key; the secret goes only to the file
+php bin/registry sign-keys --root=<root A> --index=<index key>[,<next>] [--revoke=<id>:<reason>]
+php bin/registry certify --root=<root A> --organisation=<id> --key=<their public key file>
+```
 
 ## Commands
 

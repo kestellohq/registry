@@ -29,6 +29,23 @@ final class Cli
                 'check' => self::check($root, $options),
                 'build' => self::build($root, $options),
                 'accept' => self::accept($root, $options),
+                'keygen' => self::say('New key ' . Ceremony::keygen($options['out'] ?? throw new RuntimeException('Usage: keygen --out=<file>')) . ' (secret written to the file, never shown).'),
+                'sign-keys' => self::say(Ceremony::signKeys(
+                    $root,
+                    $options['root'] ?? throw new RuntimeException('Usage: sign-keys --root=<root key file> --index=<key file>[,<key file>] [--revoke=<id>:<reason>,…] [--serial=N]'),
+                    array_values(array_filter(explode(',', $options['index'] ?? ''))),
+                    self::revocations($options['revoke'] ?? ''),
+                    isset($options['serial']) ? (int) $options['serial'] : null,
+                    self::now($options),
+                )),
+                'certify' => self::say(Ceremony::certify(
+                    $root,
+                    $options['root'] ?? throw new RuntimeException('Usage: certify --root=<root key file> --organisation=<id> --key=<key file> [--years=3]'),
+                    $options['organisation'] ?? '',
+                    $options['key'] ?? '',
+                    (int) ($options['years'] ?? 3),
+                    self::now($options),
+                )),
                 'test' => (new TestRunner())->run($root . '/tests', $options['filter'] ?? null) ? 0 : 1,
                 default => self::help(),
             };
@@ -160,9 +177,31 @@ final class Cli
         return $t === false ? throw new RuntimeException('--now is not a date and time.') : $t;
     }
 
+    private static function say(string $line): int
+    {
+        echo $line . "\n";
+
+        return 0;
+    }
+
+    /** @return array<string, string> "id:reason,id:reason" => id => reason */
+    private static function revocations(string $value): array
+    {
+        $out = [];
+        foreach (array_filter(explode(',', $value)) as $item) {
+            [$id, $reason] = array_pad(explode(':', $item, 2), 2, '');
+            if (preg_match('/^[a-f0-9]{16}$/', $id) !== 1 || trim($reason) === '') {
+                throw new RuntimeException('--revoke is <key id>:<reason>, separated by commas.');
+            }
+            $out[$id] = trim($reason);
+        }
+
+        return $out;
+    }
+
     private static function help(): int
     {
-        echo "Usage: php bin/registry check | accept --dl=<directory> [--package=<name>] [--report=<file>] | build --out=<directory> [--now=<time>] | test [--filter=<name>]\n";
+        echo "Usage: php bin/registry check | accept --dl=<directory> [--package=<name>] [--report=<file>] | build --out=<directory> [--now=<time>] | test [--filter=<name>]\n       key ceremony: keygen --out=<file> | sign-keys --root=<file> --index=<file> | certify --root=<file> --organisation=<id> --key=<file>\n";
 
         return 2;
     }
