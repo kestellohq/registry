@@ -1,0 +1,33 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/*
+ * The registry builder.
+ *
+ *   php bin/registry check                    check the inputs (every pull request; needs no secrets)
+ *   php bin/registry build --out=build/v1     build, read back with Kestello's reader, then write
+ *   php bin/registry test                     run the tests
+ *
+ * Kestello's code comes from a checkout of kestellohq/cms at the commit in cms.lock, in ./cms or
+ * wherever KESTELLO_CMS points. build signs with KESTELLO_REGISTRY_INDEX_KEY (a base64 Ed25519
+ * secret key that keys/keys.json lists); it is only ever set for the publishing job.
+ */
+
+use Kestello\Registry\Cli;
+
+$root = dirname(__DIR__);
+$cms = getenv('KESTELLO_CMS') ?: $root . '/cms';
+if (!is_file($cms . '/core/bootstrap.php')) {
+    fwrite(STDERR, "Kestello's code is missing. Check out kestellohq/cms at the commit in cms.lock into ./cms, or set KESTELLO_CMS.\n");
+    exit(2);
+}
+require $cms . '/core/bootstrap.php';
+(static function () use ($root): void {
+    $autoloader = new Kestello\Framework\Core\Autoloader();
+    $autoloader->addNamespace('Kestello\\Registry\\', $root . '/src');
+    $autoloader->register();
+})();
+
+exit(Cli::run($root, array_slice($_SERVER['argv'] ?? [], 1)));
