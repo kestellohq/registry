@@ -82,7 +82,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if git diff --quiet -- ledger; then echo "Nothing new."; exit 0; fi
+          # status, not diff: a package's first version is a new, untracked ledger file
+          if [ -z "$(git status --porcelain -- ledger)" ]; then echo "Nothing new."; exit 0; fi
           branch="intake/$(date -u +%Y%m%d-%H%M)"
           git config user.name 'github-actions[bot]'
           git config user.email '41898828+github-actions[bot]@users.noreply.github.com'
