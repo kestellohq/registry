@@ -1,0 +1,8 @@
+{
+  "type": "plugin",
+  "organisation": "kestellohq",
+  "source": { "github": "kestellohq/plugins" },
+  "categories": ["people"],
+  "homepage": "https://github.com/kestellohq/plugins/tree/main/social-login",
+  "support": "https://github.com/kestellohq/plugins/issues"
+}

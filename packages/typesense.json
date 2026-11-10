@@ -1,0 +1,8 @@
+{
+  "type": "plugin",
+  "organisation": "kestellohq",
+  "source": { "github": "kestellohq/plugins" },
+  "categories": ["marketing"],
+  "homepage": "https://github.com/kestellohq/plugins/tree/main/typesense",
+  "support": "https://github.com/kestellohq/plugins/issues"
+}
