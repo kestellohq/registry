@@ -1,0 +1,33 @@
+{
+    "format": 1,
+    "versions": [
+        {
+            "version": "1.0.0",
+            "released_at": "2026-11-10T23:03:20Z",
+            "sha256": "b99d16bfde5ece276a7267581fc84fa820db2047c32d2b997d79d1ecfeaabcac",
+            "size": 13048,
+            "key": "4b03887b17711dd6",
+            "name": "Typesense",
+            "summary": "Site search on a Typesense server: typo tolerance, instant results and better ranking for large sites.",
+            "description": "# Typesense\n\nSite search on a [Typesense](https://typesense.org) server, self-hosted or on Typesense Cloud. Visitors get typo-tolerant, instant results, and large sites get better ranking than Kestello's built-in search.\n\n## Set it up\n\n1. Activate the plugin under **Plugins**.\n2. Open **System → Infrastructure**, select **Change** on the Search row and choose **Typesense**.\n3. Fill in:\n   - **Server address**: for example `http://typesense:8108` on your own server, or `https://xyz.a1.typesense.net` on Typesense Cloud.\n   - **API key**: an admin key, or a scoped key with documents and collections access.\n   - **Collection**: `kestello` by default. Give each site on a shared server its own.\n4. Click **Test connection**, then save. The collection is rebuilt in the background.\n\nThe API key is stored sealed with the site's key. The plugin reaches only the server address you give it.\n\n## What gets searched\n\nPublished entries of the content types marked searchable, with their titles, text and tags. Drafts, trashed entries and entries under a draft or private parent are never sent to the server.\n\n## Requirements\n\nKestello 0.1 or newer, PHP 8.4 or newer, and a Typesense server.\n\nGuides are at [docs.kestello.com](https://docs.kestello.com). Licensed under the GPL, version 2 or later.\n",
+            "license": "GPL-2.0-or-later",
+            "requires": {
+                "core": "^0.1",
+                "php": ">=8.4"
+            },
+            "dependencies": {},
+            "permissions": {},
+            "notes": "### Added\n\n- The first version, moved from the Kestello repository. Installs from the Kestello registry, and from its release zip.\n",
+            "accepted_at": "2026-11-10T23:04:51Z",
+            "checks": {
+                "sha256": "matches the release",
+                "signature": "key 4b03887b17711dd6, certified for kestellohq",
+                "manifest": "valid",
+                "license": "GPL-2.0-or-later",
+                "plugin_check": "passed",
+                "install": "not run yet"
+            }
+        }
+    ],
+    "refused": {}
+}

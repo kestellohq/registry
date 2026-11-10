@@ -1,0 +1,49 @@
+{
+    "format": 1,
+    "versions": [
+        {
+            "version": "1.0.0",
+            "released_at": "2026-11-10T23:03:16Z",
+            "sha256": "97ae1030c22696567f30b29f4a5717879a806e388313f49be9231a7619e234ba",
+            "size": 12907,
+            "key": "4b03887b17711dd6",
+            "name": "Social Login",
+            "summary": "Sign in with Google (OpenID Connect) or GitHub (OAuth 2). Reference plugin for external authenticators: no core changes needed.",
+            "description": "# Social Login\n\nLet people sign in to your Kestello site with their Google or GitHub account, beside the email and password form. Google signs in with OpenID Connect, GitHub with OAuth 2.\n\nIt is also the reference for writing your own sign-in provider: it adds both through Kestello's authenticator API, with no changes to core.\n\n## Set it up\n\n1. Activate the plugin under **Plugins**.\n2. Create an OAuth app with the provider:\n   - **Google**: in the Google Cloud console, create an OAuth client ID of the type *Web application*.\n   - **GitHub**: under *Settings → Developer settings → OAuth Apps*, create a new OAuth app.\n3. Register the redirect URI the settings show: `https://your-site/auth/google/callback` or `https://your-site/auth/github/callback`.\n4. In Kestello, open **Settings → Google sign-in** or **Settings → GitHub sign-in**, paste the client ID and secret, and tick **Enabled**.\n\n\"Continue with Google\" or \"Continue with GitHub\" then shows on the sign-in page.\n\nWith Google you can accept only accounts from your Google Workspace domain: fill in **Workspace domain**. Kestello checks the domain Google signs into the reply, not only what the sign-in screen offered.\n\nYou can also set it up from the command line:\n\n```sh\nphp bin/cms plugin:config social-login google.enabled=1 google.client_id=XXX.apps.googleusercontent.com\nphp bin/cms plugin:config social-login --secret=google.client_secret\n```\n\n## Who can get in\n\n- Someone who already has an account connects Google or GitHub under **Profile → Connected sign-ins**, then signs in with it.\n- Signing in with a provider whose confirmed email matches an existing account connects them only when you allow it under **Settings → Accounts**. It is off by default.\n- Whether someone without an account may create one this way follows your site's sign-up setting under **Settings → Accounts**, as for email sign-up. It is closed by default.\n- An email the provider has not confirmed is never used to create or connect an account. With GitHub, only the primary, verified email counts.\n\nThe client secrets are stored sealed with the site's key.\n\n## What it may do\n\nThe plugin declares these permissions, shown before it installs:\n\n- **Network**: `accounts.google.com`, `oauth2.googleapis.com`, `www.googleapis.com`, `openidconnect.googleapis.com`, `github.com` and `api.github.com`, and no other host.\n- **Sign-in**: it adds sign-in providers.\n- **Users**: it creates accounts and links provider identities to them.\n\n## Requirements\n\nKestello 0.1 or newer, PHP 8.4 or newer, and an OAuth app at Google or GitHub.\n\nGuides are at [docs.kestello.com](https://docs.kestello.com). Licensed under the GPL, version 2 or later.\n",
+            "license": "GPL-2.0-or-later",
+            "requires": {
+                "core": "^0.1",
+                "php": ">=8.4"
+            },
+            "dependencies": {},
+            "permissions": {
+                "network": [
+                    "accounts.google.com",
+                    "oauth2.googleapis.com",
+                    "www.googleapis.com",
+                    "openidconnect.googleapis.com",
+                    "github.com",
+                    "api.github.com"
+                ],
+                "auth": [
+                    "authenticator"
+                ],
+                "users": [
+                    "create",
+                    "link-identities"
+                ]
+            },
+            "notes": "### Added\n\n- The first version, moved from the Kestello repository. Installs from the Kestello registry, and from its release zip.\n",
+            "accepted_at": "2026-11-10T23:04:51Z",
+            "checks": {
+                "sha256": "matches the release",
+                "signature": "key 4b03887b17711dd6, certified for kestellohq",
+                "manifest": "valid",
+                "license": "GPL-2.0-or-later",
+                "plugin_check": "passed",
+                "install": "not run yet"
+            }
+        }
+    ],
+    "refused": {}
+}
